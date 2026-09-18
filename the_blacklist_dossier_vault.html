@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE BLACKLIST // FBI Task Force Secret Dossier Network</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Fira+Code:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        obsidian: '#08090d',
+                        panel: '#0e1017',
+                        crimson: {
+                            DEFAULT: '#e50914',
+                            glow: '#ff1e27',
+                            dark: '#8b0000',
+                        },
+                        brass: {
+                            DEFAULT: '#d4af37',
+                            light: '#f3e5ab',
+                        }
+                    },
+                    fontFamily: {
+                        cinzel: ['Cinzel', 'serif'],
+                        mono: ['Fira Code', 'monospace'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* Custom Scanline Overlay */
+        .scanlines {
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.35) 50%
+            ), linear-gradient(
+                90deg,
+                rgba(255, 0, 0, 0.03),
+                rgba(0, 255, 0, 0.01),
+                rgba(0, 0, 255, 0.03)
+            );
+            background-size: 100% 3px, 6px 100%;
+            pointer-events: none;
+        }
+
+        /* Glassmorphism Tactical Border */
+        .glass-panel {
+            background: rgba(14, 16, 23, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(229, 9, 20, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.67);
+        }
+
+        .glass-panel:hover {
+            border-color: rgba(229, 9, 20, 0.45);
+        }
+
+        /* Glowing Effects */
+        .glow-crimson {
+            box-shadow: 0 0 15px rgba(229, 9, 20, 0.35);
+        }
+
+        .glow-text-crimson {
+            text-shadow: 0 0 10px rgba(229, 9, 20, 0.6);
+        }
+
+        .glow-brass {
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
+        }
+
+        /* Interactive Redacted Text mechanics */
+        .redacted {
+            background-color: #1a1a24;
+            color: transparent;
+            user-select: none;
+            cursor: pointer;
+            border-radius: 3px;
+            padding: 0 4px;
+            transition: all 0.25s ease;
+            display: inline-block;
+            border-bottom: 2px solid rgba(229, 9, 20, 0.5);
+            position: relative;
+        }
+
+        .redacted::after {
+            content: "[CLASSIFIED]";
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            color: rgba(229, 9, 20, 0.8);
+            font-family: 'Fira Code', monospace;
+            letter-spacing: 1px;
+        }
+
+        .redacted.unredacted {
+            background-color: rgba(229, 9, 20, 0.15);
+            color: #f87171;
+            user-select: text;
+            border-bottom: 2px solid #ef4444;
+        }
+
+        .redacted.unredacted::after {
+            display: none;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #08090d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #e50914;
+        }
+
+        /* Tactical Grid Background */
+        .bg-grid-pattern {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        /* Radar Sweep Animation */
+        @keyframes radar-sweep {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .animate-radar {
+            animation: radar-sweep 4s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-obsidian text-gray-200 font-sans min-h-screen relative overflow-x-hidden selection:bg-crimson selection:text-white bg-grid-pattern">
+
+    <!-- Particle Background Canvas -->
+    <canvas id="particle-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-40"></canvas>
+    
+    <!-- CRT Scanline Visual Overlay -->
+    <div class="scanlines fixed inset-0 z-50 opacity-40"></div>
+
+    <header class="sticky top-0 z-40 border-b border-crimson/30 bg-obsidian/90 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <!-- Logo & Title -->
+            <div class="flex items-center space-x-4 cursor-pointer" onclick="scrollToTop()">
+                <div class="relative w-12 h-12 rounded-lg bg-crimson/10 border border-crimson/50 flex items-center justify-center text-crimson glow-crimson">
+                    <i class="fa-solid fa-user-secret text-2xl"></i>
+                    <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-crimson opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-crimson"></span>
+                    </span>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <h1 class="font-cinzel text-xl sm:text-2xl font-extrabold tracking-widest text-white">THE BLACKLIST</h1>
+                        <span class="px-2 py-0.5 text-[10px] font-mono bg-crimson/20 text-crimson border border-crimson/40 rounded uppercase tracking-wider">RESTRICTED LEVEL 5</span>
+                    </div>
+                    <p class="text-xs font-mono text-gray-400 tracking-wider">REDDINGTON TASK FORCE DOSSIER NETWORK</p>
+                </div>
+            </div>
+
+            <!-- Operational Clocks & Audio Synthesizer Controls -->
+            <div class="hidden lg:flex items-center space-x-6 border-l border-r border-gray-800 px-6">
+                <div class="font-mono text-xs text-right">
+                    <div class="text-gray-400">WASHINGTON D.C. [EST]</div>
+                    <div id="clock-est" class="text-crimson font-bold">00:00:00 EST</div>
+                </div>
+                <div class="font-mono text-xs text-right">
+                    <div class="text-gray-400">GLOBAL INTEL [UTC]</div>
+                    <div id="clock-utc" class="text-brass font-bold">00:00:00 UTC</div>
+                </div>
+            </div>
+
+            <!-- Right Utilities & Audio Synth Toggle -->
+            <div class="flex items-center space-x-3">
+                <button id="sfx-toggle-btn" class="px-3 py-1.5 rounded-lg border border-gray-700 bg-panel hover:border-crimson text-xs font-mono flex items-center space-x-2 transition text-gray-300 hover:text-white" title="Toggle Synthesizer SFX">
+                    <i id="sfx-icon" class="fa-solid fa-volume-high text-crimson"></i>
+                    <span id="sfx-status" class="hidden sm:inline">SFX: ON</span>
+                </button>
+                <a href="#submit-intel" class="px-4 py-2 rounded-lg bg-crimson hover:bg-crimson-dark text-white font-mono text-xs uppercase tracking-wider font-semibold shadow-lg shadow-crimson/20 transition flex items-center space-x-2">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span class="hidden sm:inline">Submit Intel</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="bg-panel/80 border-t border-gray-800/80 px-4 sm:px-8">
+            <div class="max-w-7xl mx-auto flex space-x-2 sm:space-x-8 overflow-x-auto py-2 text-xs font-mono text-gray-400 no-scrollbar">
+                <button onclick="switchTab('database')" id="tab-database" class="nav-tab text-crimson border-b-2 border-crimson pb-1 font-semibold flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-database"></i><span>TARGET DATABASE</span>
+                </button>
+                <button onclick="switchTab('featured')" id="tab-featured" class="nav-tab hover:text-white pb-1 flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-crosshairs"></i><span>TOP PRIORITIES</span>
+                </button>
+                <button onclick="switchTab('vault')" id="tab-vault" class="nav-tab hover:text-white pb-1 flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-quote-left"></i><span>RED'S WISDOM VAULT</span>
+                </button>
+                <button onclick="switchTab('terminal')" id="tab-terminal" class="nav-tab hover:text-white pb-1 flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-terminal"></i><span>RSA TERMINAL UPLINK</span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="glass-panel p-4 rounded-xl flex items-center justify-between">
+                <div>
+                    <div class="text-xs font-mono text-gray-400 uppercase">Total Dossiers</div>
+                    <div class="text-2xl font-bold font-mono text-white mt-1" id="stat-total">161</div>
+                </div>
+                <div class="p-3 bg-red-950/40 rounded-lg text-crimson text-xl">
+                    <i class="fa-solid fa-folder-closed"></i>
+                </div>
+            </div>
+            <div class="glass-panel p-4 rounded-xl flex items-center justify-between">
+                <div>
+                    <div class="text-xs font-mono text-gray-400 uppercase">At Large / Active</div>
+                    <div class="text-2xl font-bold font-mono text-amber-500 mt-1" id="stat-atlarge">42</div>
+                </div>
+                <div class="p-3 bg-amber-950/40 rounded-lg text-amber-500 text-xl">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+            </div>
+            <div class="glass-panel p-4 rounded-xl flex items-center justify-between">
+                <div>
+                    <div class="text-xs font-mono text-gray-400 uppercase">Neutralized / In Custody</div>
+                    <div class="text-2xl font-bold font-mono text-emerald-500 mt-1" id="stat-captured">98</div>
+                </div>
+                <div class="p-3 bg-emerald-950/40 rounded-lg text-emerald-500 text-xl">
+                    <i class="fa-solid fa-handcuffs"></i>
+                </div>
+            </div>
+            <div class="glass-panel p-4 rounded-xl flex items-center justify-between">
+                <div>
+                    <div class="text-xs font-mono text-gray-400 uppercase">Task Force Active Ops</div>
+                    <div class="text-2xl font-bold font-mono text-brass mt-1">21 UNITS</div>
+                </div>
+                <div class="p-3 bg-yellow-950/40 rounded-lg text-brass text-xl">
+                    <i class="fa-solid fa-satellite-dish"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 1: BLACKLIST DATABASE -->
+        <section id="section-database" class="space-y-6">
+            
+            <!-- Controls Bar -->
+            <div class="glass-panel p-6 rounded-2xl space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="font-cinzel text-xl text-white font-bold tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-list-ol text-crimson"></i>
+                            THE BLACKLIST DATABASE
+                        </h2>
+                        <p class="text-xs font-mono text-gray-400 mt-1">Filter criminal masterminds, assassins, spies, and fixers provided by Raymond Reddington.</p>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="relative min-w-[280px]">
+                        <input type="text" id="search-input" placeholder="Search target name, alias, or No..." class="w-full bg-obsidian border border-gray-700 focus:border-crimson rounded-xl px-4 py-2.5 pl-10 text-sm font-mono text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-crimson transition">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-gray-500 text-sm"></i>
+                        <button id="clear-search" class="hidden absolute right-3 top-3 text-gray-500 hover:text-white text-xs">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-800 text-xs font-mono">
+                    <span class="text-gray-500 uppercase mr-2">Status:</span>
+                    <button class="status-filter-btn active px-3 py-1 rounded-lg bg-crimson text-white font-semibold" data-status="ALL">ALL</button>
+                    <button class="status-filter-btn px-3 py-1 rounded-lg bg-obsidian border border-gray-800 text-gray-400 hover:text-white" data-status="AT LARGE">AT LARGE</button>
+                    <button class="status-filter-btn px-3 py-1 rounded-lg bg-obsidian border border-gray-800 text-gray-400 hover:text-white" data-status="CAPTURED">CAPTURED</button>
+                    <button class="status-filter-btn px-3 py-1 rounded-lg bg-obsidian border border-gray-800 text-gray-400 hover:text-white" data-status="DECEASED">DECEASED</button>
+                    
+                    <div class="h-4 w-[1px] bg-gray-800 mx-2 hidden sm:block"></div>
+
+                    <span class="text-gray-500 uppercase mr-2">Category:</span>
+                    <select id="category-select" class="bg-obsidian border border-gray-800 rounded-lg px-3 py-1 text-gray-300 focus:border-crimson outline-none">
+                        <option value="ALL">ALL CATEGORIES</option>
+                        <option value="Assassins">Assassins & Hitmen</option>
+                        <option value="Spies">Spies & Infiltrators</option>
+                        <option value="Fixers">Fixers & Brokers</option>
+                        <option value="Hackers">Cyber Terrorists</option>
+                        <option value="Syndicate">Syndicate Leaders</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Target Grid -->
+            <div id="target-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Dynamic Target Cards injected via JS -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="no-results" class="hidden glass-panel p-12 text-center rounded-2xl">
+                <i class="fa-solid fa-user-slash text-4xl text-crimson mb-4"></i>
+                <h3 class="font-cinzel text-lg text-white font-bold">NO MATCHING BLACKLIST DOSSIER FOUND</h3>
+                <p class="text-xs font-mono text-gray-400 mt-2">Adjust your intelligence parameters or search term.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: REDDINGTON'S WISDOM VAULT -->
+        <section id="section-vault" class="space-y-6">
+            <div class="glass-panel p-8 rounded-2xl relative overflow-hidden">
+                <div class="absolute -right-12 -top-12 text-crimson/5 text-9xl font-cinzel pointer-events-none">"</div>
+                
+                <div class="max-w-3xl space-y-6">
+                    <div class="flex items-center space-x-3">
+                        <span class="px-3 py-1 rounded bg-brass/10 border border-brass/40 text-brass font-mono text-xs uppercase font-semibold">THE CONCIERGE OF CRIME PARABLES</span>
+                        <span class="text-xs font-mono text-gray-500">// AUDIO TRANSMISSION ARCHIVE</span>
+                    </div>
+
+                    <blockquote id="quote-text" class="font-cinzel text-xl sm:text-2xl text-white leading-relaxed italic border-l-4 border-crimson pl-6">
+                        "Value lies not in what you hold, but in what you are willing to betray to secure it."
+                    </blockquote>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-800">
+                        <div>
+                            <div class="font-bold text-white font-mono text-sm">— Raymond Reddington</div>
+                            <div id="quote-context" class="text-xs font-mono text-gray-400">Task Force Briefing Room // Season 2, Ep 14</div>
+                        </div>
+
+                        <!-- Audio Visualizer Waves Canvas -->
+                        <div class="hidden sm:flex items-center space-x-3">
+                            <canvas id="audio-visualizer" width="160" height="36" class="bg-obsidian/60 rounded border border-gray-800"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4 pt-2">
+                        <button id="next-quote-btn" class="px-5 py-2.5 rounded-xl bg-crimson hover:bg-crimson-dark text-white font-mono text-xs uppercase font-bold tracking-wider transition flex items-center space-x-2 glow-crimson">
+                            <i class="fa-solid fa-forward"></i>
+                            <span>Next Wisdom</span>
+                        </button>
+                        <button id="copy-quote-btn" class="px-4 py-2.5 rounded-xl border border-gray-700 bg-obsidian hover:border-gray-500 text-gray-300 font-mono text-xs uppercase transition flex items-center space-x-2">
+                            <i class="fa-solid fa-copy"></i>
+                            <span>Copy Parable</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: SECURE TERMINAL & INTEL TRANSMISSION -->
+        <section id="section-terminal" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Terminal Output Log -->
+            <div class="lg:col-span-2 glass-panel rounded-2xl p-6 font-mono text-xs space-y-4 flex flex-col justify-between min-h-[380px]">
+                <div>
+                    <div class="flex items-center justify-between border-b border-gray-800 pb-3 text-gray-400">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-3 h-3 rounded-full bg-crimson inline-block animate-pulse"></span>
+                            <span class="text-white font-bold">RSA-4096 SECURE TERMINAL UPLINK</span>
+                        </div>
+                        <span>LOCATION: POST OFFICE HQ</span>
+                    </div>
+
+                    <div id="terminal-log" class="mt-4 space-y-2 text-emerald-400 h-64 overflow-y-auto pr-2">
+                        <div class="text-gray-500">[SYSTEM]: Connection established to Reddington Inner Circle Relay Node.</div>
+                        <div class="text-gray-500">[SYSTEM]: Encryption handshake standard RSA-4096 verified.</div>
+                        <div><span class="text-crimson">[REDDINGTON]:</span> "Speak, Agent. Intelligence without prompt action is merely gossip."</div>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-gray-800 flex items-center space-x-2">
+                    <span class="text-crimson font-bold">&gt;</span>
+                    <input type="text" id="terminal-cmd-input" placeholder="Enter tactical query or command (e.g., 'status', 'reddington', 'help')..." class="w-full bg-transparent text-white border-none focus:outline-none font-mono text-xs">
+                </div>
+            </div>
+
+            <!-- Intelligence Submission Form -->
+            <div id="submit-intel" class="glass-panel p-6 rounded-2xl space-y-4">
+                <h3 class="font-cinzel text-lg text-white font-bold flex items-center space-x-2">
+                    <i class="fa-solid fa-paper-plane text-crimson"></i>
+                    <span>SUBMIT CLASSIFIED INTEL</span>
+                </h3>
+                <p class="text-xs font-mono text-gray-400">Direct channel to Dembe Zuma & Raymond Reddington's intelligence network.</p>
+
+                <form id="intel-form" class="space-y-3 font-mono text-xs">
+                    <div>
+                        <label class="block text-gray-400 mb-1">AGENT CODE NAME</label>
+                        <input type="text" required placeholder="Agent Keen / Navabi" class="w-full bg-obsidian border border-gray-800 focus:border-crimson rounded-lg p-2 text-white outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-400 mb-1">TARGET IDENTIFIER / BLACKLIST NO.</label>
+                        <input type="text" required placeholder="Target name or Blacklist No." class="w-full bg-obsidian border border-gray-800 focus:border-crimson rounded-lg p-2 text-white outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-400 mb-1">INTELLIGENCE BRIEFING</label>
+                        <textarea rows="3" required placeholder="Provide location details, operational threat, or associates..." class="w-full bg-obsidian border border-gray-800 focus:border-crimson rounded-lg p-2 text-white outline-none resize-none"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full py-2.5 rounded-xl bg-crimson hover:bg-crimson-dark text-white font-bold uppercase tracking-wider transition flex items-center justify-center space-x-2 glow-crimson">
+                        <i class="fa-solid fa-lock"></i>
+                        <span>ENCRYPT & TRANSMIT</span>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- CLASSIFIED DOSSIER MODAL -->
+    <div id="dossier-modal" class="fixed inset-0 z-50 hidden bg-obsidian/90 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+        <div class="glass-panel max-w-4xl w-full rounded-2xl border-2 border-crimson/60 shadow-2xl overflow-hidden relative my-8">
+            
+            <!-- Modal Header -->
+            <div class="bg-panel px-6 py-4 border-b border-gray-800 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <span id="modal-blacklist-num" class="px-3 py-1 bg-crimson text-white font-mono font-bold text-sm rounded glow-crimson">NO. --</span>
+                    <h3 id="modal-target-name" class="font-cinzel text-xl font-bold text-white tracking-wide">TARGET NAME</h3>
+                </div>
+                <button id="close-modal-btn" class="w-8 h-8 rounded-lg bg-obsidian border border-gray-700 text-gray-400 hover:text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Target Visual Portrait & Threat Radar Sweep -->
+                <div class="space-y-4">
+                    <div class="relative w-full aspect-square rounded-xl bg-obsidian border border-gray-800 overflow-hidden flex items-center justify-center group">
+                        <div id="modal-portrait-icon" class="text-6xl text-gray-700">
+                            <i class="fa-solid fa-user-secret"></i>
+                        </div>
+                        
+                        <!-- Tactical Radar Overlay -->
+                        <div class="absolute inset-0 border border-crimson/20 rounded-xl pointer-events-none flex items-center justify-center">
+                            <div class="w-3/4 h-3/4 rounded-full border border-crimson/10"></div>
+                            <div class="w-1/2 h-1/2 rounded-full border border-crimson/20"></div>
+                            <div class="absolute w-full h-[1px] bg-crimson/20"></div>
+                            <div class="absolute h-full w-[1px] bg-crimson/20"></div>
+                            <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-crimson/10 to-transparent animate-radar origin-center"></div>
+                        </div>
+
+                        <div class="absolute bottom-2 left-2 right-2 px-2 py-1 bg-obsidian/80 backdrop-blur rounded text-[10px] font-mono text-crimson border border-crimson/30 text-center">
+                            CONFIDENTIAL // EYES ONLY
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 font-mono text-xs">
+                        <div class="flex justify-between border-b border-gray-800 pb-1">
+                            <span class="text-gray-500">Threat Level:</span>
+                            <span id="modal-threat-level" class="font-bold text-crimson">EXTREME</span>
+                        </div>
+                        <div class="flex justify-between border-b border-gray-800 pb-1">
+                            <span class="text-gray-500">Status:</span>
+                            <span id="modal-status" class="font-bold text-amber-500">AT LARGE</span>
+                        </div>
+                        <div class="flex justify-between border-b border-gray-800 pb-1">
+                            <span class="text-gray-500">Category:</span>
+                            <span id="modal-category" class="text-white">Assassins</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Intelligence & Un-redaction Mechanism -->
+                <div class="md:col-span-2 space-y-5">
+                    
+                    <div>
+                        <h4 class="font-mono text-xs text-crimson font-bold uppercase tracking-wider mb-2">// BIOGRAPHICAL INTEL & OPERATIONAL HISTORY</h4>
+                        <p id="modal-bio" class="text-xs font-mono leading-relaxed text-gray-300">
+                            Loading dossier intelligence report...
+                        </p>
+                    </div>
+
+                    <!-- Known Associates -->
+                    <div>
+                        <h4 class="font-mono text-xs text-brass font-bold uppercase tracking-wider mb-2">// KNOWN ASSOCIATES & CABAL CONNECTIONS</h4>
+                        <div id="modal-associates" class="flex flex-wrap gap-2">
+                            <!-- Associates tags -->
+                        </div>
+                    </div>
+
+                    <!-- Relationship Node Visualization Canvas Preview -->
+                    <div>
+                        <h4 class="font-mono text-xs text-gray-400 font-bold uppercase tracking-wider mb-2">// NETWORK NODE LINK GRAPH</h4>
+                        <div class="w-full h-32 bg-obsidian border border-gray-800 rounded-xl relative overflow-hidden flex items-center justify-center">
+                            <canvas id="node-graph-canvas" width="400" height="128" class="w-full h-full"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="pt-2 flex items-center justify-between border-t border-gray-800">
+                        <span class="text-[10px] font-mono text-gray-500">Click any redacted black bar to un-redact intelligence.</span>
+                        <button onclick="closeModal()" class="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-mono text-xs">Close Dossier</button>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        const BLACKLIST_DATA = [
+            {
+                number: 1,
+                name: "Raymond 'Red' Reddington",
+                alias: "Concierge of Crime",
+                category: "Syndicate",
+                status: "AT LARGE",
+                threat: "MAXIMUM",
+                bio: "Former US Naval Intelligence Officer turned criminal mastermind. Controls a global syndicate of high-profile intelligence brokers. <span class='redacted'>Real identity remains unknown to the FBI. Operates from high-security safehouses worldwide.</span> Key architect of the Post Office Task Force.",
+                associates: ["Dembe Zuma", "Elizabeth Keen", "Mr. Kaplan", "Harold Cooper"],
+                icon: "fa-user-secret"
+            },
+            {
+                number: 4,
+                name: "Elizabeth Keen",
+                alias: "Masha Rostova",
+                category: "Spies",
+                status: "DECEASED",
+                threat: "HIGH",
+                bio: "Former FBI Profiler assigned to Reddington's Task Force. <span class='redacted'>Daughter of KGB Operative Katarina Rostova. Inherited key access to the N-13 intelligence archive.</span> Tragically assassinated in New York City.",
+                associates: ["Raymond Reddington", "Tom Keen", "Harold Cooper", "Donald Ressler"],
+                icon: "fa-user"
+            },
+            {
+                number: 7,
+                name: "Katarina Rostova",
+                alias: "Tatiana Petrova",
+                category: "Spies",
+                status: "DECEASED",
+                threat: "EXTREME",
+                bio: "Legendary KGB operative targeted by the Townsend Directive. <span class='redacted'>Manipulated Task Force operations to uncover Reddington's ultimate secret agenda.</span> Neutralized by Reddington.",
+                associates: ["Dominic Wilkinson", "Ivan Stepanov", "Neville Townsend"],
+                icon: "fa-eye"
+            },
+            {
+                number: 11,
+                name: "Tom Keen",
+                alias: "Jacob Phelps",
+                category: "Assassins",
+                status: "DECEASED",
+                threat: "EXTREME",
+                bio: "Operative trained by The Major's covert academy. <span class='redacted'>Hired originally by Berlin to infiltrate Elizabeth Keen's personal life.</span> Later defected to protect Elizabeth.",
+                associates: ["The Major", "Berlin", "Elizabeth Keen"],
+                icon: "fa-mask"
+            },
+            {
+                number: 14,
+                name: "Anslo Garrick",
+                alias: "Wild Bunch Leader",
+                category: "Mercenary",
+                status: "DECEASED",
+                threat: "EXTREME",
+                bio: "Mercenary leader who executed a breach on the FBI Post Office black site. <span class='redacted'>Contracted by The Cabal to capture and interrogate Reddington.</span> Executed personally by Reddington.",
+                associates: ["The Cabal", "Fitch"],
+                icon: "fa-person-rifle"
+            },
+            {
+                number: 16,
+                name: "The Director",
+                alias: "Harold Pitch",
+                category: "Syndicate",
+                status: "DECEASED",
+                threat: "CRITICAL",
+                bio: "High-ranking CIA Official who led covert shadow operations for The Cabal. <span class='redacted'>Engineered framing of Elizabeth Keen for the ORE execution.</span> Dropped from aircraft by Reddington.",
+                associates: ["Matias Solomon", "The Cabal", "Peter Kotsiopoulos"],
+                icon: "fa-building-columns"
+            },
+            {
+                number: 22,
+                name: "Ivan Stepanov",
+                alias: "Friend from the East",
+                category: "Spies",
+                status: "AT LARGE",
+                threat: "EXTREME",
+                bio: "Senior SVR officer with deep access to Russian intelligence infrastructure. <span class='redacted'>Primary Handler for Reddington's Sikorsky Archive network for over 30 years.</span>",
+                associates: ["Raymond Reddington", "Katarina Rostova"],
+                icon: "fa-user-ninja"
+            },
+            {
+                number: 37,
+                name: "Luther Braxton",
+                alias: "The Master Thief",
+                category: "Fixers",
+                status: "DECEASED",
+                threat: "EXTREME",
+                bio: "Specialist thief who targeted high-security covert military data hubs. <span class='redacted'>Infiltrated the Factory offshore rig to extract Fulcrum code memories from Elizabeth Keen.</span> Neutralized in Maryland.",
+                associates: ["The Director", "The Cabal"],
+                icon: "fa-key"
+            },
+            {
+                number: 50,
+                name: "Matias Solomon",
+                alias: "Cabal Enforcer",
+                category: "Assassins",
+                status: "AT LARGE",
+                threat: "CRITICAL",
+                bio: "Ruthless former CIA black ops enforcer turned Cabal mercenary. <span class='redacted'>Extremely skilled in interrogation and tactical ambushes. Survived multiple Task Force engagements.</span>",
+                associates: ["The Director", "Neville Townsend"],
+                icon: "fa-skull-crossbones"
+            },
+            {
+                number: 84,
+                name: "Berlin",
+                alias: "Milos Pavel",
+                category: "Syndicate",
+                status: "DECEASED",
+                threat: "CRITICAL",
+                bio: "Former KGB Officer who launched a decade-long revenge war against Reddington. <span class='redacted'>Believed Reddington murdered his daughter, orchestrated by The Cabal.</span> Neutralized in safehouse.",
+                associates: ["Tom Keen", "Lord Baltimore", "The Major"],
+                icon: "fa-crown"
+            },
+            {
+                number: 114,
+                name: "The Alchemist",
+                alias: "Edward Jennings",
+                category: "Fixers",
+                status: "CAPTURED",
+                threat: "HIGH",
+                bio: "Genetics specialist capable of altering DNA samples, dental records, and forensic signatures of deceased bodies to simulate deaths for high-paying criminal fugitives.",
+                associates: ["The Cabal", "Madeline Pratt"],
+                icon: "fa-flask font-awesome"
+            },
+            {
+                number: 161,
+                name: "The Stewmaker",
+                alias: "Stanley Cornish",
+                category: "Fixers",
+                status: "DECEASED",
+                threat: "EXTREME",
+                bio: "Meticulous body-disposal expert who utilized chemical acid baths and photographic logging to completely erase targets without leaving forensic traces.",
+                associates: ["Hector Lorca", "Raymond Reddington"],
+                icon: "fa-vial"
+            }
+        ];
+
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playSynthesizedSFX(type) {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                const now = ctx.currentTime;
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(200, now + 0.05);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'beep') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(1200, now);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'decrypt') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.linearRampToValueAtTime(900, now + 0.15);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                } else if (type === 'radar') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, now);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                }
+            } catch (e) {
+                console.log("Audio play error", e);
+            }
+        }
+
+        // Toggle Sound SFX Button
+        document.getElementById('sfx-toggle-btn').addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            const statusText = document.getElementById('sfx-status');
+            const icon = document.getElementById('sfx-icon');
+
+            if (soundEnabled) {
+                statusText.innerText = "SFX: ON";
+                icon.className = "fa-solid fa-volume-high text-crimson";
+                playSynthesizedSFX('click');
+            } else {
+                statusText.innerText = "SFX: OFF";
+                icon.className = "fa-solid fa-volume-xmark text-gray-500";
+            }
+        });
+
+        function updateClocks() {
+            const now = new Date();
+            
+            // EST
+            const estString = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12: false });
+            document.getElementById('clock-est').innerText = estString + ' EST';
+
+            // UTC
+            const utcString = now.toISOString().substring(11, 19);
+            document.getElementById('clock-utc').innerText = utcString + ' UTC';
+        }
+        setInterval(updateClocks, 1000);
+        updateClocks();
+
+        function initParticleCanvas() {
+            const canvas = document.getElementById('particle-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            const particles = Array.from({ length: 45 }, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 2 + 0.5,
+                speedY: -(Math.random() * 0.4 + 0.1),
+                opacity: Math.random() * 0.5 + 0.2,
+                color: Math.random() > 0.3 ? '#e50914' : '#d4af37'
+            }));
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                particles.forEach(p => {
+                    p.y += p.speedY;
+                    if (p.y < 0) {
+                        p.y = canvas.height;
+                        p.x = Math.random() * canvas.width;
+                    }
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = p.opacity;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        let currentStatusFilter = 'ALL';
+        let currentCategoryFilter = 'ALL';
+        let searchQuery = '';
+
+        function renderTargetGrid() {
+            const grid = document.getElementById('target-cards-grid');
+            const noResults = document.getElementById('no-results');
+            grid.innerHTML = '';
+
+            const filtered = BLACKLIST_DATA.filter(item => {
+                const matchesStatus = currentStatusFilter === 'ALL' || item.status === currentStatusFilter;
+                const matchesCategory = currentCategoryFilter === 'ALL' || item.category === currentCategoryFilter;
+                const matchesSearch = item.name.toLowerCase().includes(searchQuery) ||
+                                      item.alias.toLowerCase().includes(searchQuery) ||
+                                      item.number.toString().includes(searchQuery);
+                return matchesStatus && matchesCategory && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+            }
+
+            filtered.forEach(target => {
+                const card = document.createElement('div');
+                card.className = "glass-panel p-5 rounded-2xl flex flex-col justify-between hover:border-crimson transition duration-300 group relative";
+                
+                let statusBadge = "bg-amber-950/60 text-amber-400 border-amber-800/50";
+                if (target.status === 'DECEASED') statusBadge = "bg-red-950/60 text-red-400 border-red-800/50";
+                if (target.status === 'CAPTURED') statusBadge = "bg-emerald-950/60 text-emerald-400 border-emerald-800/50";
+
+                card.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between border-b border-gray-800/80 pb-2">
+                            <span class="px-2.5 py-1 rounded bg-crimson/20 border border-crimson/40 text-crimson font-mono font-bold text-xs">
+                                NO. ${target.number}
+                            </span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono border ${statusBadge}">
+                                ${target.status}
+                            </span>
+                        </div>
+
+                        <div class="flex items-start space-x-3">
+                            <div class="w-12 h-12 rounded-xl bg-obsidian border border-gray-800 flex items-center justify-center text-gray-400 text-xl group-hover:text-crimson transition">
+                                <i class="fa-solid ${target.icon}"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-cinzel font-bold text-white group-hover:text-crimson transition text-base line-clamp-1">${target.name}</h3>
+                                <p class="text-xs font-mono text-gray-400">Alias: ${target.alias}</p>
+                            </div>
+                        </div>
+
+                        <p class="text-xs font-mono text-gray-400 line-clamp-2 leading-relaxed">
+                            ${target.bio.replace(/<[^>]*>?/gm, '')}
+                        </p>
+                    </div>
+
+                    <div class="pt-4 mt-3 border-t border-gray-800/80 flex items-center justify-between">
+                        <span class="text-[10px] font-mono text-brass flex items-center gap-1">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Threat: ${target.threat}
+                        </span>
+                        <button onclick="openDossierModal(${target.number})" class="px-3 py-1.5 rounded-lg bg-obsidian border border-gray-700 hover:border-crimson hover:bg-crimson hover:text-white text-xs font-mono transition">
+                            INSPECT DOSSIER
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Search Events
+        const searchInput = document.getElementById('search-input');
+        const clearBtn = document.getElementById('clear-search');
+
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value.toLowerCase().trim();
+            if (searchQuery.length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+            renderTargetGrid();
+        });
+
+        clearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            searchQuery = '';
+            clearBtn.classList.add('hidden');
+            renderTargetGrid();
+            playSynthesizedSFX('click');
+        });
+
+        // Status Filters
+        document.querySelectorAll('.status-filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.status-filter-btn').forEach(b => {
+                    b.className = "status-filter-btn px-3 py-1 rounded-lg bg-obsidian border border-gray-800 text-gray-400 hover:text-white";
+                });
+                btn.className = "status-filter-btn active px-3 py-1 rounded-lg bg-crimson text-white font-semibold";
+                currentStatusFilter = btn.getAttribute('data-status');
+                playSynthesizedSFX('click');
+                renderTargetGrid();
+            });
+        });
+
+        // Category Filter
+        document.getElementById('category-select').addEventListener('change', (e) => {
+            currentCategoryFilter = e.target.value;
+            playSynthesizedSFX('click');
+            renderTargetGrid();
+        });
+
+        function openDossierModal(blacklistNumber) {
+            const target = BLACKLIST_DATA.find(t => t.number === blacklistNumber);
+            if (!target) return;
+
+            document.getElementById('modal-blacklist-num').innerText = `NO. ${target.number}`;
+            document.getElementById('modal-target-name').innerText = target.name.toUpperCase();
+            document.getElementById('modal-threat-level').innerText = target.threat;
+            document.getElementById('modal-status').innerText = target.status;
+            document.getElementById('modal-category').innerText = target.category;
+            document.getElementById('modal-bio').innerHTML = target.bio;
+
+            const associatesContainer = document.getElementById('modal-associates');
+            associatesContainer.innerHTML = '';
+            target.associates.forEach(assoc => {
+                const badge = document.createElement('span');
+                badge.className = "px-2.5 py-1 rounded bg-obsidian border border-brass/40 text-brass text-[11px] font-mono";
+                badge.innerText = assoc;
+                associatesContainer.appendChild(badge);
+            });
+
+            const portraitIcon = document.getElementById('modal-portrait-icon');
+            portraitIcon.innerHTML = `<i class="fa-solid ${target.icon}"></i>`;
+
+            // Setup Redacted Click Listeners
+            setTimeout(() => {
+                document.querySelectorAll('.redacted').forEach(elem => {
+                    elem.addEventListener('click', function() {
+                        this.classList.toggle('unredacted');
+                        playSynthesizedSFX('decrypt');
+                    });
+                });
+            }, 50);
+
+            // Draw Node Graph Canvas
+            drawNodeGraph(target.name);
+
+            document.getElementById('dossier-modal').classList.remove('hidden');
+            playSynthesizedSFX('radar');
+        }
+
+        function closeModal() {
+            document.getElementById('dossier-modal').classList.add('hidden');
+            playSynthesizedSFX('click');
+        }
+
+        document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+
+        function drawNodeGraph(targetName) {
+            const canvas = document.getElementById('node-graph-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const nodes = [
+                { x: 60, y: 64, label: "REDDINGTON", color: "#e50914" },
+                { x: 200, y: 64, label: targetName.split(' ')[0].toUpperCase(), color: "#d4af37" },
+                { x: 340, y: 40, label: "CABAL", color: "#ef4444" },
+                { x: 340, y: 88, label: "TASK FORCE", color: "#10b981" }
+            ];
+
+            // Draw Connections
+            ctx.strokeStyle = "rgba(229, 9, 20, 0.4)";
+            ctx.lineWidth = 1.5;
+            
+            ctx.beginPath();
+            ctx.moveTo(nodes[0].x, nodes[0].y);
+            ctx.lineTo(nodes[1].x, nodes[1].y);
+            ctx.lineTo(nodes[2].x, nodes[2].y);
+            ctx.moveTo(nodes[1].x, nodes[1].y);
+            ctx.lineTo(nodes[3].x, nodes[3].y);
+            ctx.stroke();
+
+            // Draw Nodes
+            nodes.forEach(n => {
+                ctx.fillStyle = n.color;
+                ctx.beginPath();
+                ctx.arc(n.x, n.y, 6, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "9px 'Fira Code', monospace";
+                ctx.fillText(n.label, n.x - 20, n.y + 18);
+            });
+        }
+
+        const REDDINGTON_QUOTES = [
+            { text: "Value lies not in what you hold, but in what you are willing to betray to secure it.", context: "Task Force Briefing Room // Season 2, Ep 14" },
+            { text: "There are foundational truths in this world. Gravity, entropy, and the fact that I always get what I came for.", context: "Post Office HQ // Season 1, Ep 01" },
+            { text: "Dembe, fetch the scotch. We are dealing with amateurs who mistake aggression for strategy.", context: "Safehouse Prague // Season 4, Ep 08" },
+            { text: "I have no desire to judge you, Harold. But if you cross me, I won't need a court of law.", context: "Director's Office // Season 3, Ep 02" },
+            { text: "As my old friend in Prague used to say: Never bring a knife to a negotiation unless you've already cut the brake lines.", context: "Private Jet // Season 5, Ep 11" },
+            { text: "You can't judge a book by its cover, but you can certainly read its execution order.", context: "The Blacksite // Season 2, Ep 22" }
+        ];
+
+        let currentQuoteIndex = 0;
+
+        document.getElementById('next-quote-btn').addEventListener('click', () => {
+            currentQuoteIndex = (currentQuoteIndex + 1) % REDDINGTON_QUOTES.length;
+            const quote = REDDINGTON_QUOTES[currentQuoteIndex];
+            document.getElementById('quote-text').innerText = `"${quote.text}"`;
+            document.getElementById('quote-context').innerText = quote.context;
+            playSynthesizedSFX('beep');
+        });
+
+        document.getElementById('copy-quote-btn').addEventListener('click', () => {
+            const quoteText = document.getElementById('quote-text').innerText;
+            const contextText = document.getElementById('quote-context').innerText;
+            
+            // execCommand fallback for strict iframe safety
+            const dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = `${quoteText} — Raymond Reddington (${contextText})`;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+
+            playSynthesizedSFX('click');
+            const btnSpan = document.querySelector('#copy-quote-btn span');
+            const orig = btnSpan.innerText;
+            btnSpan.innerText = "Copied!";
+            setTimeout(() => { btnSpan.innerText = orig; }, 1500);
+        });
+
+        // Simulated Voice Audio Visualizer
+        function initAudioVisualizer() {
+            const canvas = document.getElementById('audio-visualizer');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            function renderWave() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const bars = 16;
+                const barWidth = canvas.width / bars;
+
+                for (let i = 0; i < bars; i++) {
+                    const height = Math.random() * (canvas.height - 8) + 4;
+                    ctx.fillStyle = i % 2 === 0 ? '#e50914' : '#d4af37';
+                    ctx.fillRect(i * barWidth + 2, (canvas.height - height) / 2, barWidth - 4, height);
+                }
+            }
+            setInterval(renderWave, 120);
+        }
+
+        const terminalLog = document.getElementById('terminal-log');
+        const cmdInput = document.getElementById('terminal-cmd-input');
+
+        function appendTerminalText(sender, text, colorClass = "text-emerald-400") {
+            const div = document.createElement('div');
+            div.className = colorClass;
+            div.innerHTML = `<span class="text-crimson">[${sender}]:</span> ${text}`;
+            terminalLog.appendChild(div);
+            terminalLog.scrollTop = terminalLog.scrollHeight;
+        }
+
+        cmdInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const cmd = cmdInput.value.trim().toLowerCase();
+                if (!cmd) return;
+
+                appendTerminalText("AGENT", cmdInput.value, "text-white font-bold");
+                cmdInput.value = '';
+                playSynthesizedSFX('beep');
+
+                setTimeout(() => {
+                    if (cmd.includes('help')) {
+                        appendTerminalText("SYSTEM", "Available commands: 'status', 'reddington', 'dossier', 'clear', 'taskforce'");
+                    } else if (cmd.includes('status')) {
+                        appendTerminalText("SYSTEM", "Task Force Post Office: DEFCON 3 Active. All communications encrypted RSA-4096.");
+                    } else if (cmd.includes('reddington')) {
+                        appendTerminalText("REDDINGTON", "Elizabeth, I am currently enjoying a 1982 Chateau Margaux in Vienna. Speak quickly.");
+                    } else if (cmd.includes('clear')) {
+                        terminalLog.innerHTML = '';
+                    } else {
+                        appendTerminalText("SYSTEM", `Command '${cmd}' logged and forwarded to Dembe Zuma.`);
+                    }
+                }, 400);
+            }
+        });
+
+        // Intel Submission Form Handler
+        document.getElementById('intel-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            playSynthesizedSFX('decrypt');
+
+            appendTerminalText("INTEL RELAY", "Encrypted transmission uploaded successfully. Hash: 0x9F82A4...", "text-brass");
+            appendTerminalText("REDDINGTON", "Intelligence received. Dembe is verifying the coordinates.", "text-crimson font-bold");
+
+            e.target.reset();
+        });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.className = "nav-tab hover:text-white pb-1 flex items-center space-x-2 whitespace-nowrap text-gray-400";
+            });
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            if (activeTab) {
+                activeTab.className = "nav-tab text-crimson border-b-2 border-crimson pb-1 font-semibold flex items-center space-x-2 whitespace-nowrap";
+            }
+
+            playSynthesizedSFX('click');
+
+            if (tabId === 'database' || tabId === 'featured') {
+                document.getElementById('section-database').scrollIntoView({ behavior: 'smooth' });
+            } else if (tabId === 'vault') {
+                document.getElementById('section-vault').scrollIntoView({ behavior: 'smooth' });
+            } else if (tabId === 'terminal') {
+                document.getElementById('section-terminal').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.onload = function() {
+            initParticleCanvas();
+            renderTargetGrid();
+            initAudioVisualizer();
+        };
+    </script>
+</body>
+</html>
